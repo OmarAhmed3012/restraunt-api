@@ -107,6 +107,11 @@ const getSpicialUsers = asyncHandler(async (req, res) => {
             'specialRest.cuisine': cuisine,
           },
         },
+        {
+          $project: {
+            specialRest: 0,
+          },
+        },
       ]
       const users = await User.aggregate(pipeline)
 
