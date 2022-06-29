@@ -87,7 +87,38 @@ const generateToken = (id) => {
 }
 
 //GET Special Users By Cuisine
-const getSpicialUsers = asyncHandler(async (req, res) => {})
+const getSpicialUsers = asyncHandler(async (req, res) => {
+  try {
+    const cuisine = req.query.cuisine
+
+    if (cuisine) {
+      const pipeline = [
+        {
+          $lookup: {
+            from: 'restaurants',
+            localField: '_id',
+            foreignField: 'owner',
+            as: 'specialRest',
+          },
+        },
+        {
+          $match: {
+            fav_cuisine: cuisine,
+            'specialRest.cuisine': cuisine,
+          },
+        },
+      ]
+      const users = await User.aggregate(pipeline)
+
+      if (users) {
+        res.status(200).json(users)
+      }
+    }
+  } catch (e) {
+    res.status(400).send(e)
+    throw new Error('somthing went wrong')
+  }
+})
 
 module.exports = {
   registerUser,
