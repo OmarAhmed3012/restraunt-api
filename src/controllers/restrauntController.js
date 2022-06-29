@@ -71,8 +71,6 @@ const getRestrauntByNameOrCuisine = asyncHandler(async (req, res) => {
   const uniqueName = req.query.uniquename
   const cuisine = req.query.cuisine
 
-  console.log(req)
-
   if (uniqueName && cuisine) {
     res.status(400).send('you can not call cuisine and unique name together')
   }
@@ -118,6 +116,20 @@ const getAllRestraunts = asyncHandler(async (req, res) => {
   }
 })
 
+//GET My Restraunts
+const getMyRestraunts = asyncHandler(async (req, res) => {
+  try {
+    const restaurant = await Restaurant.find({ owner: req.user._id })
+
+    if (!restaurant) {
+      return res.status(404).send()
+    }
+    res.send(restaurant)
+  } catch (e) {
+    res.status(500).send(e)
+  }
+})
+
 //UPDATE restaurant
 const editRestraunt = asyncHandler(async (req, res) => {
   const updates = Object.keys(req.body)
@@ -136,6 +148,8 @@ const editRestraunt = asyncHandler(async (req, res) => {
       owner: req.user._id,
     })
 
+    console.log(restaurant)
+
     if (!restaurant) {
       return res.status(404).send()
     }
@@ -153,7 +167,7 @@ const deleteRestraunt = asyncHandler(async (req, res) => {
   try {
     const restaurant = await Restaurant.findOneAndDelete({
       _id: req.params.id,
-      owner: req.user._id,
+      //      owner: req.user._id,
     })
 
     if (!restaurant) {
@@ -169,6 +183,7 @@ const deleteRestraunt = asyncHandler(async (req, res) => {
 module.exports = {
   addRestraunt,
   editRestraunt,
+  getMyRestraunts,
   deleteRestraunt,
   getAllRestraunts,
   getRestraunt,
