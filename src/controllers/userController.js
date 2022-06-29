@@ -7,43 +7,45 @@ const bcrypt = require('bcryptjs')
 const registerUser = asyncHandler(async (req, res) => {
   const { first_name, last_name, fav_cuisine, email, password } = req.body
 
-  if (!first_name || !last_name || !fav_cuisine || !email || !password) {
-    res.status(400)
-    throw new Error('Please add all fields')
-  }
+  try {
+    if (!first_name || !last_name || !fav_cuisine || !email || !password) {
+      res.status(400)
+      throw new Error('Please add all fields')
+    }
 
-  // Check if user exists
-  const userExists = await User.findOne({ email })
+    // Check if user exists
+    const userExists = await User.findOne({ email })
 
-  if (userExists) {
-    res.status(400)
-    throw new Error('User already exists')
-  }
+    if (userExists) {
+      res.status(400)
+      throw new Error('User already exists')
+    }
 
-  // Hash password
-  const salt = await bcrypt.genSalt(10)
-  const hashedPassword = await bcrypt.hash(password, salt)
+    // Hash password
+    const salt = await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash(password, salt)
 
-  // Create user
-  const user = await User.create({
-    first_name,
-    last_name,
-    fav_cuisine,
-    email,
-    password: hashedPassword,
-  })
-
-  if (user) {
-    res.status(201).send({
-      _id: user.id,
-      first_name: user.first_name,
-      last_name: user.last_name,
-      fav_cuisine: user.fav_cuisine,
-      email: user.email,
-      token: generateToken(user._id),
+    // Create user
+    const user = await User.create({
+      first_name,
+      last_name,
+      fav_cuisine,
+      email,
+      password: hashedPassword,
     })
-  } else {
-    res.status(400)
+
+    if (user) {
+      res.status(201).send({
+        _id: user.id,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        fav_cuisine: user.fav_cuisine,
+        email: user.email,
+        token: generateToken(user._id),
+      })
+    }
+  } catch (e) {
+    res.status(400).send(e)
     throw new Error('Invalid user data')
   }
 })
@@ -52,20 +54,22 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body
 
-  // Check for user email
-  const user = await User.findOne({ email })
+  try {
+    // Check for user email
+    const user = await User.findOne({ email })
 
-  if (user && (await bcrypt.compare(password, user.password))) {
-    res.send({
-      _id: user.id,
-      first_name: user.first_name,
-      last_name: user.last_name,
-      fav_cuisine: user.fav_cuisine,
-      email: user.email,
-      token: generateToken(user._id),
-    })
-  } else {
-    res.status(400)
+    if (user && (await bcrypt.compare(password, user.password))) {
+      res.send({
+        _id: user.id,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        fav_cuisine: user.fav_cuisine,
+        email: user.email,
+        token: generateToken(user._id),
+      })
+    }
+  } catch (e) {
+    res.status(400).send(e)
     throw new Error('Invalid credentials')
   }
 })

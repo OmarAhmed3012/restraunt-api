@@ -11,6 +11,7 @@ connectDB()
 app.use(bodyParser.json())
 
 app.use('/api/users', require('./routes/userRoutes'))
+app.use('/api/restraunts', require('./routes/restrauntRoute'))
 
 const port = process.env.PORT || 5000
 app.listen(port, () => {
